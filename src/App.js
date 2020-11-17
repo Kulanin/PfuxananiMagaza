@@ -20,20 +20,17 @@ import firstImage from "./images/image1.jpg"
 
 
 //------------------------------------------------------------------------
-//Compoment which displays each user information 
+//Compoment which displays each member information 
 //------------------------------------------------------------------------
 function Members(props) {
 
-  let users = props.members;
-
-  let eachUser = [];
+  const members = props.members;
 
   return (
     <div className="c_members">
 
       {
-        eachUser = users.map((value, index) => {
-
+        members.map((value, index) => {
           return <Card className="c_membersContainer" style={{ "width": "18rem" }}>
             <Card.Img variant="top" src={firstImage} ></Card.Img>
             <Card.Body>
@@ -71,6 +68,11 @@ class App extends React.Component {
 
     super(props);
 
+    this.state = {
+      display: false,
+      name: "Kulani"
+    }
+
     this.DisplayForm = this.DisplayForm.bind(this)
 
   }
@@ -104,7 +106,7 @@ class App extends React.Component {
 
 
         <Members members={members} displayForm={this.DisplayForm} />
-
+        <StokvelForm />
 
 
 
