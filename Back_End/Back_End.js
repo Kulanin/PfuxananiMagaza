@@ -47,11 +47,39 @@ let DatabaseConnection = async () => {
 
 
 
-app.post("/", (req, res) => {
+app.get("/", (req, res) => {
 
-    if (res) {
+    if (req) {
 
-        res.send(JSON.stringify({ "name": "Kulani" }));
+        sql.connect(config.localDatabase, (err) => {
+
+            if (err) {
+
+                console.log(err);
+                return;
+            }
+
+            let SelectStatement = "select * from Stokvel_Members";
+
+            //create a request object
+
+            let request = new sql.Request();
+
+            request.query(SelectStatement, (error, recordset) => {
+
+                if (error) {
+
+                    console.log("There was an error retrieving data from the database");
+                }
+
+                console.log(JSON.stringify(recordset));
+
+                res.send(JSON.stringify(recordset))
+
+            })
+
+            //res.send(JSON.stringify({ "name": "Kulani" }));
+        })
     }
 
 })
@@ -87,6 +115,7 @@ app.post("/insert", (req, res) => {
                 }
 
                 console.log("Data inserted successfully");
+
             })
 
         });
