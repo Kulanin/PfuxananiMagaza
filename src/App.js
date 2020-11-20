@@ -54,7 +54,7 @@ function Members(props) {
               <Card.Text id={index} >Cell : {value.cell}</Card.Text>
               <Card.Text id={index}>Total Contribution : {`R ${value.contribution}`}</Card.Text>
             </Card.Body>
-            <Button variant="primary" onClick={props.displayForm}>Add Amount</Button>
+            <Button variant="primary" onClick={props.ToggleModalState}>Add Amount</Button>
           </Card >
 
         })
@@ -69,15 +69,8 @@ function Members(props) {
 
 }
 
-let members = [
-  { name: "Kulani", surname: "Ngobeni", image: "image1.jpg", cell: "071 445 8895", "contribution": 300 },
-  { name: "Lulama", surname: "Ngobeni", image: "image2.jpg", cell: "079 888 2523", "contribution": 1000 },
-  { name: "Phindile", surname: "Ngobeni", image: "image3.jpg", cell: "081 963 2252", "contribution": 500 },
-  { name: "Arthur", surname: "Tivani", image: "image4.jpg", cell: "011 435 3358", "contribution": 700 },
-
-];
 //let users = ["Phindile", "Kulani", "Lulama"];
-let MemberList = {};
+let g_MemberList = [];
 
 class App extends React.Component {
 
@@ -89,11 +82,14 @@ class App extends React.Component {
       display: false,
       name: "Kulani",
       ModalState: false,
+      dataset: g_MemberList
     }
 
     this.DisplayForm = this.DisplayForm.bind(this)
 
   }
+
+  
 
   FetchDataFromTheBackEnd = () => {
 
@@ -111,8 +107,15 @@ class App extends React.Component {
 
     fetch(url, requestOptions)
       .then(p_Resolve => p_Resolve.json())
-      .then(p_JsonResolve => { console.log("Json resolve " + JSON.stringify(p_JsonResolve)) })
-      .catch(p_Reject => console.log("There was an error " + p_Reject));
+      .then(p_JsonResolve => p_JsonResolve.map((data,index)=>{
+
+        console.log(data,index)
+
+        this.MemberListArray(data);
+
+
+      }))
+      .catch(p_Reject => console.log("There was an error " + p_Reject))
 
 
 
@@ -139,6 +142,26 @@ class App extends React.Component {
       <StokvelForm />
     )
   }
+
+  ToggleModalState = ()=>{
+
+    this.setState({
+      ModalState: true,
+  });
+
+  }
+
+  MemberListArray(p_MemberList){
+
+    g_MemberList.push(p_MemberList);
+
+    this.setState({
+
+      dataset: g_MemberList
+    })
+
+  }
+
   render() {
 
     return (
@@ -159,7 +182,7 @@ class App extends React.Component {
         </header>
 
 
-        <Members members={members} FormModal={this.FormModal} />
+        <Members members={this.state.dataset} ToggleModalState={this.ToggleModalState} />
 
         <FormModal ModalState={this.state.ModalState} />
 
