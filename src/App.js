@@ -7,11 +7,11 @@ import Modal from 'react-modal'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StokvelForm from "./components/Form"
 
-import firstImage from "./images/image1.jpg"
+import Phindile from "./images/Phindile.jpg"
 
 
 //------------------------------------------------------------------------
-//Display Members form
+//
 //------------------------------------------------------------------------
 
 
@@ -22,12 +22,13 @@ import firstImage from "./images/image1.jpg"
 
 function FormModal(props) {
 
-
   return (
     <div>
-      <Modal className="c_FormModal" isOpen={props.ModalState}>
+      <Modal className="c_FormModal" isOpen={props.ModalState} >
 
-        <StokvelForm />
+        <StokvelForm  dataset={props.dataset} 
+        classRegisterForm={props.classRegisterForm}  
+        classPaymentForm = {props.classPaymentForm} />
 
       </Modal>
     </div>
@@ -41,24 +42,28 @@ function FormModal(props) {
 function Members(props) {
 
   const members = props.members;
-
+ 
   return (
+
+    
     <div className="c_members">
+
 
       {
         members.map((value, index) => {
+
+          console.log(value.firstname);
           return <Card className="c_membersContainer" style={{ "width": "18rem" }}>
-            <Card.Img variant="top" src={firstImage} ></Card.Img>
+            <Card.Img variant="top" src={Phindile} ></Card.Img>
             <Card.Body>
-              <Card.Title>{value.name} {value.surname}</Card.Title>
-              <Card.Text id={index} >Cell : {value.cell}</Card.Text>
-              <Card.Text id={index}>Total Contribution : {`R ${value.contribution}`}</Card.Text>
+              <Card.Title>{value.firstname} {value.lastname}</Card.Title>
+              {/*<Card.Text id={index} >Cell : {value.cell}</Card.Text> */}
+              <Card.Text id={index}>Total Contribution : {`R ${value.Total}`}</Card.Text>
             </Card.Body>
             <Button variant="primary" onClick={props.ToggleModalState}>Add Amount</Button>
           </Card >
 
         })
-
 
       }
 
@@ -66,11 +71,12 @@ function Members(props) {
   )
 
 
-
 }
 
 //let users = ["Phindile", "Kulani", "Lulama"];
 let g_MemberList = [];
+let VariosState = {};
+
 
 class App extends React.Component {
 
@@ -82,16 +88,17 @@ class App extends React.Component {
       display: false,
       name: "Kulani",
       ModalState: false,
+      classPaymentForm: "none",
+      classRegisterForm:"none",
+
       dataset: g_MemberList
     }
 
-    this.DisplayForm = this.DisplayForm.bind(this)
+   
 
   }
 
-  
-
-  FetchDataFromTheBackEnd = () => {
+  async FetchDataFromTheBackEnd() {
 
     let url = "http://127.0.0.1:5001/";
 
@@ -102,22 +109,26 @@ class App extends React.Component {
       method: "GET",
       headers: { "Content-Type": "application/json" },
 
-
     };
 
-    fetch(url, requestOptions)
-      .then(p_Resolve => p_Resolve.json())
-      .then(p_JsonResolve => p_JsonResolve.map((data,index)=>{
+    try {
 
-        console.log(data,index)
+      let data = await fetch(url, requestOptions);
+      let response = await data.json();
+      if (response) {
+        // console.log(JSON.stringify(response));
+        response.recordset.map((data, index) => {
+          console.log(data);
+          this.MemberListArray(data);
+        })
 
-        this.MemberListArray(data);
+      }
 
+    }
+    catch (p_Reject) {
 
-      }))
-      .catch(p_Reject => console.log("There was an error " + p_Reject))
-
-
+      console.log("There was error when fetching data" + p_Reject);
+    }
 
   }
 
@@ -129,29 +140,32 @@ class App extends React.Component {
   }
 
 
+  ToggleModalState = (props,register = "") => {
 
+    if(register){
 
+      console.log("Kulani register : " + register);
 
+      this.setState({
+        ModalState: true,
+        classRegisterForm: "block",
+        classPaymentForm:"none",
+  
+      });
 
-
-  DisplayForm() {
-
-    console.log("I have been clicked")
-    return (
-
-      <StokvelForm />
-    )
-  }
-
-  ToggleModalState = ()=>{
+      return;
+    }
 
     this.setState({
       ModalState: true,
-  });
+      classPaymentForm:"block",
+    
+
+    });
 
   }
 
-  MemberListArray(p_MemberList){
+  MemberListArray(p_MemberList) {
 
     g_MemberList.push(p_MemberList);
 
@@ -160,6 +174,8 @@ class App extends React.Component {
       dataset: g_MemberList
     })
 
+    console.log(this.state.dataset)
+
   }
 
   render() {
@@ -167,6 +183,9 @@ class App extends React.Component {
     return (
       <div className="App">
         <header className="App-header">
+          <ul>
+            <li><a href="#" onClick={(props)=>this.ToggleModalState(props,"Kulani")} >Register</a></li>
+          </ul>
           <img src={logo} className="App-logo" alt="logo" />
           <p>
             Pfuxanani Magaza Stokvel
@@ -182,9 +201,16 @@ class App extends React.Component {
         </header>
 
 
-        <Members members={this.state.dataset} ToggleModalState={this.ToggleModalState} />
+        <Members members={this.state.dataset} 
+        ToggleModalState={this.ToggleModalState}
+   
+         />
 
-        <FormModal ModalState={this.state.ModalState} />
+        <FormModal ModalState={this.state.ModalState}
+          dataset={this.state.dataset}
+          classRegisterForm = {this.state.classRegisterForm}
+          classPaymentForm = {this.state.classPaymentForm}
+         />
 
 
       </div>
