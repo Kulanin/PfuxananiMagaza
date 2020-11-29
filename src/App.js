@@ -7,7 +7,6 @@ import Modal from 'react-modal'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import StokvelForm from "./components/Form"
 
-import Phindile from "./images/Phindile.jpg"
 
 
 //------------------------------------------------------------------------
@@ -28,7 +27,11 @@ function FormModal(props) {
 
         <StokvelForm  dataset={props.dataset} 
         classRegisterForm={props.classRegisterForm}  
-        classPaymentForm = {props.classPaymentForm} />
+        classPaymentForm = {props.classPaymentForm} 
+        uniqueMemberid ={props.uniqueMemberid}
+        buttonText = {props.buttonText}
+        
+        />
 
       </Modal>
     </div>
@@ -54,13 +57,13 @@ function Members(props) {
 
           console.log(value.firstname);
           return <Card className="c_membersContainer" style={{ "width": "18rem" }}>
-            <Card.Img variant="top" src={Phindile} ></Card.Img>
+            <Card.Img variant="top" src={`/images/${value.firstname}.jpg`}  ></Card.Img>
             <Card.Body>
               <Card.Title>{value.firstname} {value.lastname}</Card.Title>
               {/*<Card.Text id={index} >Cell : {value.cell}</Card.Text> */}
-              <Card.Text id={index}>Total Contribution : {`R ${value.Total}`}</Card.Text>
+              <Card.Text id={index}>Total Contribution : {`R ${value.Total}.00`}</Card.Text>
             </Card.Body>
-            <Button variant="primary" onClick={props.ToggleModalState}>Add Amount</Button>
+            <Button variant="primary" onClick={()=>props.ToggleModalState(props,value.memberId)}>Add Amount</Button>
           </Card >
 
         })
@@ -75,7 +78,7 @@ function Members(props) {
 
 //let users = ["Phindile", "Kulani", "Lulama"];
 let g_MemberList = [];
-let VariosState = {};
+
 
 
 class App extends React.Component {
@@ -90,6 +93,8 @@ class App extends React.Component {
       ModalState: false,
       classPaymentForm: "none",
       classRegisterForm:"none",
+      buttonText: "",
+      uniqueMemberid: "",
 
       dataset: g_MemberList
     }
@@ -140,16 +145,16 @@ class App extends React.Component {
   }
 
 
-  ToggleModalState = (props,register = "") => {
+  ToggleModalState = (props,p_Value = "") => {
 
-    if(register){
-
-      console.log("Kulani register : " + register);
+    console.log("Kulani ToggleState passed value : " + p_Value);
+    if(p_Value == "register"){
 
       this.setState({
         ModalState: true,
         classRegisterForm: "block",
         classPaymentForm:"none",
+        buttonText: "Register Now"
   
       });
 
@@ -159,6 +164,8 @@ class App extends React.Component {
     this.setState({
       ModalState: true,
       classPaymentForm:"block",
+      uniqueMemberid: p_Value,
+      buttonText: "Submit"
     
 
     });
@@ -184,7 +191,7 @@ class App extends React.Component {
       <div className="App">
         <header className="App-header">
           <ul>
-            <li><a href="#" onClick={(props)=>this.ToggleModalState(props,"Kulani")} >Register</a></li>
+            <li><a href="#" onClick={(props)=>this.ToggleModalState(props,"register")} >Register</a></li>
           </ul>
           <img src={logo} className="App-logo" alt="logo" />
           <p>
@@ -203,6 +210,7 @@ class App extends React.Component {
 
         <Members members={this.state.dataset} 
         ToggleModalState={this.ToggleModalState}
+      
    
          />
 
@@ -210,6 +218,8 @@ class App extends React.Component {
           dataset={this.state.dataset}
           classRegisterForm = {this.state.classRegisterForm}
           classPaymentForm = {this.state.classPaymentForm}
+          uniqueMemberid ={this.state.uniqueMemberid}
+          buttonText = {this.state.buttonText}
          />
 
 

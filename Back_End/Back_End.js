@@ -15,6 +15,12 @@ app.use(cors())
 //result object
 
 let resultObject = {};
+let g_MemberId = 0;
+
+updateGlobalVariable = (p_MemberId)=>{
+
+        g_MemberId = p_MemberId;
+}
 
 //------------------------------------------------------------------------------------
 //Success Response
@@ -87,9 +93,12 @@ app.get("/", (req, res) => {
 
         let SelectStatement = `select[Stokvel_Members].memberId, [Stokvel_Members].firstname, [Stokvel_Members].lastname, SUM(Stokvel_Payments.amount) as Total    FROM [Stokvel_Members].[dbo].[Stokvel_Payments] 
 
-        inner join [Stokvel_Members].[dbo].Stokvel_Members ON Stokvel_Members.memberId = Stokvel_Payments.memberId
-        
+         inner join [Stokvel_Members].[dbo].Stokvel_Members ON Stokvel_Members.memberId = Stokvel_Payments.memberId
+      
         GROUP BY Stokvel_Members.memberId,Stokvel_Members.firstname,Stokvel_Members.lastname`;
+
+        //let SelectStatement = `select TOP 5 * from [Stokvel_Members].[dbo].Stokvel_Members`;
+        //let SelectStatement = `select MAX(memberId) as Max from [Stokvel_Members].[dbo].Stokvel_Members`;
 
         sql.connect(config.localDatabase, (err) => {
 
@@ -105,13 +114,14 @@ app.get("/", (req, res) => {
 
             let request = new sql.Request();
 
-            request.query(SelectStatement, (error, recordset) => {
+            request.query(SelectStatement, (error,recordset) => {
 
                 if (error) {
 
                     console.log("There was an error retrieving data from the database");
                 }
 
+         
                 console.log(JSON.stringify(recordset));
 
                 res.send(JSON.stringify(recordset))
@@ -128,10 +138,10 @@ app.post("/insert", (req, res) => {
 
     if (req) {
 
-        let id = req.body.member.memberid;
+        let cell = req.body.member.cell;
         let firstname = req.body.member.firstname;
         let lastname = req.body.member.lastname;
-        console.log(`Id : ${id}  Name : ${firstname} Surname :${lastname}`);
+        console.log(`cell : ${cell}  Name : ${firstname} Surname :${lastname}`);
 
         sql.connect(config.localDatabase, (err) => {
 
@@ -142,12 +152,20 @@ app.post("/insert", (req, res) => {
             }
 
             let request = new sql.Request();
+            let testDate = "2020-11-26";
+            let defaultAmount = 0;
 
 
             let insertStatement = "insert into [Stokvel_Members].[dbo].[Stokvel_Members]";
-            insertStatement += "([memberId],  [firstname], [lastname])";
-            insertStatement += "VALUES ('" + id + "', '" + firstname + "','" + lastname + "')";
-            request.query(insertStatement, (error) => {
+            insertStatement += "([firstname], [lastname],[cell])";
+            insertStatement += "VALUES ('" + firstname + "','" + lastname + "','" + cell + "')";
+
+            let selectMax ="SELECT MAX([memberId]) as Max from [Stokvel_Members].[dbo].[Stokvel_Members]";
+           // let updatePayment = "update  [Stokvel_Members].[dbo].[Stokvel_Payments] set amount =  0 where memberId = '"+g_MemberId+"' ";
+            //const insertPayment = `insert into dbo.Stokvel_Payments([amount],[date],[memberId]) VALUES(${defaultDate},${testDate},${g_MemberId})`;
+            //const insertPayment2  = `insert into dbo.Stokvel_Payments VALUES(${defaultAmount},'${testDate}',${g_MemberId})`;
+            
+            request.query(insertStatement, (error,recordeset) => {
 
                 if (error) {
 
@@ -155,13 +173,53 @@ app.post("/insert", (req, res) => {
                     return;
                 }
 
-                console.log("Data inserted successfully");
+                console.log("Data inserted successfully" + recordeset);
+
+                request.query(selectMax, (error,recordset) => {
+
+                    if (error) {
+    
+                        console.log("There was an error inserting the data " + error);
+                        SendeErrorResponse("There was an error inserting the data ",error);
+                        return;
+                    }
+
+                    console.log("Data inserted successfully" + console.log(JSON.stringify(recordset)));
+
+                    recordset.recordset.map(Max=>{ 
+                     
+
+                        console.log(Max.Max);
+
+                        const insertPayment2  = `insert into dbo.Stokvel_Payments VALUES(${defaultAmount},'${testDate}',${Max.Max})`;
+                        request.query(insertPayment2, (error,recordset) => {
+            
+                            if (error) {
+            
+                                console.log("There was an error inserting the data " + error);
+                                return;
+                            }
+            
+                            console.log("Data was successfully updated");
+
+                            SendResultsResponse("Data was successfully added",res);
+            
+                            
+            
+                    })
+                    })
 
             })
+
+    
+
+        })
 
         });
     }
 })
+
+
 
 app.post("/Payment",(req,res)=>{
 
@@ -173,8 +231,8 @@ app.post("/Payment",(req,res)=>{
     let dateTest = date;
     let newDate = dateTest.replace(/-/g,"");
 
-    const insertPayment = `insert into dbo.Stokvel_Payments([paymentNumber],[amount],[date],[memberId]) VALUES(${3},${amount},${dateTest},${memberid})`
-    const insertPayment2  = `insert into dbo.Stokvel_Payments VALUES(${8},${amount},'${date}',${memberid})`;
+    const insertPayment = `insert into dbo.Stokvel_Payments([amount],[date],[memberId]) VALUES(${amount},${dateTest},${memberid})`
+    const insertPayment2  = `insert into dbo.Stokvel_Payments VALUES(${amount},'${date}',${memberid})`;
   
         //create request object
 
