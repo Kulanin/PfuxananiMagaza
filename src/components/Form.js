@@ -19,8 +19,13 @@ class StokvelForm extends React.Component {
             date: "",
             amount: "",
             cell: "",
-            //classLastnameDisplay: "none",
-            //classPaymentForm:"none",
+            //below usued to manipulate form control background colors
+            FirstnameBorderColor: "",
+            LastnameBorderColor: "",
+            DateBorderColor: "",
+            AmountBorderColor: "",
+            MemberIdBorderColor: "",
+            //End of styled background colors
             SuccessPaymentMessage: "",
             ErrorPaymentMessage: "",
 
@@ -39,8 +44,11 @@ class StokvelForm extends React.Component {
 
                 console.log("Firstname cannot be empty")
                 this.setState({
-                    ErrorPaymentMessage: "Firstname cannot be empty! "
+                    ErrorPaymentMessage: "Firstname cannot be empty! ",
+                    FirstnameBorderColor: "red"
                 })
+
+                
 
                 return false;
             } else if (p_InputValueObject.lastname === "") {
@@ -48,7 +56,8 @@ class StokvelForm extends React.Component {
                 console.log("Lastname cannot be empty")
 
                 this.setState({
-                    ErrorPaymentMessage: "Lastname cannot be empty! "
+                    ErrorPaymentMessage: "Lastname cannot be empty! ",
+                    LastnameBorderColor:"red"
                 })
 
                 return false;
@@ -62,16 +71,19 @@ class StokvelForm extends React.Component {
 
                 console.log("Date cannot be empty")
                 this.setState({
-                    ErrorPaymentMessage: "Date cannot be empty! "
+                    ErrorPaymentMessage: "Date cannot be empty! ",
+                    DateBorderColor:"red"
+                    
                 })
 
                 return false;
 
             }else if (p_InputValueObject.amount === "") {
 
-                console.log("Date cannot be empty")
+                console.log("Amount cannot be empty")
                 this.setState({
-                    ErrorPaymentMessage: "Amount cannot be empty! "
+                    ErrorPaymentMessage: "Amount cannot be empty! ",
+                    AmountBorderColor:"red",
                 })
 
                 return false;
@@ -97,7 +109,7 @@ class StokvelForm extends React.Component {
 
         return (
 
-            <Alert variant={p_Variant} style={{ "height": 50, "marginTop": -20 }} show={p_Show}>
+            <Alert variant={p_Variant} style={{ "height": 45, "marginTop": -20 }} show={p_Show}>
                 <p style={{ "textAlign": "center" }}>
                     {p_Message}
                 </p>
@@ -184,7 +196,13 @@ class StokvelForm extends React.Component {
         const name = event.target.name;
         const value = event.target.value;
 
-        this.setState({ [name]: value })
+        this.setState({ [name]: value,
+        
+            FirstnameBorderColor:"",
+            LastnameBorderColor:"",
+            AmountBorderColor:"",
+            DateBorderColor:""
+        })
 
     }
 
@@ -195,7 +213,7 @@ class StokvelForm extends React.Component {
         const classPaymentForm = {
 
             "display": this.props.dataset ? this.props.classPaymentForm : "block",
-            "marginTop": 10
+            "marginTop": 10,
 
         }
 
@@ -206,6 +224,65 @@ class StokvelForm extends React.Component {
 
         }
 
+        //-----------------------------------------------------------------------
+        const ClassFirstname = {
+
+            "display": this.props.dataset ? this.props.classRegisterForm : "block",
+            "marginTop": 10,
+
+        }
+         //-----------------------------------------------------------------------
+         const styleFirstname = {
+
+            "display": this.props.dataset ? this.props.classRegisterForm : "block",
+            "marginTop": 10,
+            "borderColor":this.state.FirstnameBorderColor
+
+        }
+
+
+        const styleLastname = {
+
+            "display": this.props.dataset ? this.props.classRegisterForm : "block",
+            "marginTop": 10,
+            "borderColor":this.state.LastnameBorderColor
+            
+
+        }
+
+        const styleCell = {
+
+            "display": this.props.dataset ? this.props.classRegisterForm : "block",
+            "marginTop": 10
+
+        }
+
+        const styleDate = {
+
+            "display": this.props.dataset ? this.props.classPaymentForm : "block",
+            "marginTop": 10,
+            "borderColor":this.state.DateBorderColor
+
+        }
+
+        const styleAmount = {
+
+            "display": this.props.dataset ? this.props.classPaymentForm : "block",
+            "marginTop": 10,
+            "borderColor":this.state.AmountBorderColor
+            
+
+        }
+
+        const styleMemberId = {
+
+            "display": this.props.dataset ? this.props.classPaymentForm : "block",
+            "marginTop": 10
+
+        }
+
+  
+
         console.log("KulanUniqueID" + this.props.uniqueMemberid)
         return (
 
@@ -215,18 +292,18 @@ class StokvelForm extends React.Component {
                 {this.AlertMessage(this.state.ErrorPaymentMessage ? this.state.ErrorPaymentMessage : this.state.SuccessPaymentMessage, this.state.ErrorPaymentMessage ? "danger" : "success", this.state.ErrorPaymentMessage || this.state.SuccessPaymentMessage ? true : false)}
                 <Form.Group controlId="basicForm" style={{ "margin": 30 }} >
 
-                    <Form.Label className={classRegisterForm} style={classRegisterForm} required >Firstname</Form.Label>
-                    <Form.Control className={classRegisterForm} style={classRegisterForm} type="firstname" onChange={this.handleChange} placeholder="firstname" name="firstname"></Form.Control>
-                    <Form.Label className={classRegisterForm} style={classRegisterForm}>Lastname</Form.Label>
-                    <Form.Control className={classRegisterForm} style={classRegisterForm} type="lastname" onChange={this.handleChange} placeholder="lastname" name="lastname"></Form.Control>
-                    <Form.Label className={classRegisterForm} style={classRegisterForm}>Cell</Form.Label>
-                    <Form.Control className={classRegisterForm} style={classRegisterForm} type="cell" onChange={this.handleChange} placeholder="cell" name="cell"></Form.Control>
-                    <Form.Label className={classPaymentForm} style={classPaymentForm}  >Date</Form.Label>
-                    <Form.Control className={classPaymentForm} style={classPaymentForm} type="date" onChange={this.handleChange} placeholder={new Date().toLocaleDateString()} name="date" ></Form.Control>
-                    <Form.Label className={classPaymentForm} style={classPaymentForm}  >Amount</Form.Label>
-                    <Form.Control className={classPaymentForm} style={classPaymentForm} type="amount" onChange={this.handleChange} placeholder="R500.00" name="amount"></Form.Control>
-                    <Form.Label className={classPaymentForm} style={classPaymentForm}   >Member ID</Form.Label>
-                    <Form.Control className={classPaymentForm} style={classPaymentForm} type="memberid" onChange={this.handleChange} disabled="disabled" value={this.props.uniqueMemberid} name="memberid"></Form.Control>
+                    <Form.Label className={ClassFirstname} required >Firstname</Form.Label>
+                    <Form.Control className={ClassFirstname} style={styleFirstname} type="firstname" onChange={this.handleChange} placeholder="firstname" name="firstname"></Form.Control>
+                    <Form.Label className={classRegisterForm} style={styleLastname}>Lastname</Form.Label>
+                    <Form.Control className={classRegisterForm} style={styleLastname} type="lastname" onChange={this.handleChange} placeholder="lastname" name="lastname"></Form.Control>
+                    <Form.Label className={classRegisterForm} style={styleCell}>Cell</Form.Label>
+                    <Form.Control className={classRegisterForm} style={styleCell} type="cell" onChange={this.handleChange} placeholder="cell" name="cell"></Form.Control>
+                    <Form.Label className={classPaymentForm} style={styleDate}  >Date</Form.Label>
+                    <Form.Control className={classPaymentForm} style={styleDate} type="date" onChange={this.handleChange} placeholder={new Date().toLocaleDateString()} name="date" ></Form.Control>
+                    <Form.Label className={classPaymentForm} style={styleAmount}  >Amount</Form.Label>
+                    <Form.Control className={classPaymentForm} style={styleAmount} type="amount" onChange={this.handleChange} placeholder="R500.00" name="amount"></Form.Control>
+                    <Form.Label className={classPaymentForm} style={styleMemberId}   >Amount ID</Form.Label>
+                    <Form.Control className={classPaymentForm} style={styleMemberId} type="memberid" onChange={this.handleChange} disabled="disabled" value={this.props.uniqueMemberid} name="memberid"></Form.Control>
 
                     {/**   <Form.Text className="text-Muted">Just testing </Form.Text>*/}
 
