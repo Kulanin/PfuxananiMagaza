@@ -11,6 +11,11 @@ class StokvelForm extends React.Component {
 
         super(props);
 
+        this.lastnameRef = React.createRef();
+        this.firstnameRef = React.createRef();
+        this.date = React.createRef();
+        this.amount = React.createRef();
+
         this.state = {
 
             firstname: "",
@@ -43,18 +48,20 @@ class StokvelForm extends React.Component {
             if (p_InputValueObject.firstname === "") {
 
                 console.log("Firstname cannot be empty")
+               this.firstnameRef.current.focus();
                 this.setState({
                     ErrorPaymentMessage: "Firstname cannot be empty! ",
                     FirstnameBorderColor: "red"
+                   
                 })
 
-                
+               
 
                 return false;
             } else if (p_InputValueObject.lastname === "") {
 
                 console.log("Lastname cannot be empty")
-
+                this.lastnameRef.current.focus();
                 this.setState({
                     ErrorPaymentMessage: "Lastname cannot be empty! ",
                     LastnameBorderColor:"red"
@@ -69,7 +76,8 @@ class StokvelForm extends React.Component {
 
             if (p_InputValueObject.date === "") {
 
-                console.log("Date cannot be empty")
+                console.log("Date cannot be empty");
+                this.date.current.focus();
                 this.setState({
                     ErrorPaymentMessage: "Date cannot be empty! ",
                     DateBorderColor:"red"
@@ -80,7 +88,8 @@ class StokvelForm extends React.Component {
 
             }else if (p_InputValueObject.amount === "") {
 
-                console.log("Amount cannot be empty")
+                console.log("Amount cannot be empty");
+                this.amount.current.focus();
                 this.setState({
                     ErrorPaymentMessage: "Amount cannot be empty! ",
                     AmountBorderColor:"red",
@@ -201,9 +210,17 @@ class StokvelForm extends React.Component {
             FirstnameBorderColor:"",
             LastnameBorderColor:"",
             AmountBorderColor:"",
-            DateBorderColor:""
+            DateBorderColor:"",
+            ErrorPaymentMessage: ""
         })
 
+    }
+
+    CancelButton(event){
+        window.location.reload(false)
+        event.preventDefault();
+
+      
     }
 
 
@@ -287,28 +304,28 @@ class StokvelForm extends React.Component {
         return (
 
 
-            <Form className="classForm">
+            <Form className="classForm"   >
 
-                {this.AlertMessage(this.state.ErrorPaymentMessage ? this.state.ErrorPaymentMessage : this.state.SuccessPaymentMessage, this.state.ErrorPaymentMessage ? "danger" : "success", this.state.ErrorPaymentMessage || this.state.SuccessPaymentMessage ? true : false)}
+              <div>{this.AlertMessage(this.state.ErrorPaymentMessage ? this.state.ErrorPaymentMessage : this.state.SuccessPaymentMessage, this.state.ErrorPaymentMessage ? "danger" : "success", this.state.ErrorPaymentMessage || this.state.SuccessPaymentMessage ? true : false)}</div>  
                 <Form.Group controlId="basicForm" style={{ "margin": 30 }} >
 
-                    <Form.Label className={ClassFirstname} required >Firstname</Form.Label>
-                    <Form.Control className={ClassFirstname} style={styleFirstname} type="firstname" onChange={this.handleChange} placeholder="firstname" name="firstname"></Form.Control>
+                    <Form.Label className={ClassFirstname} style={styleFirstname}  >Firstname</Form.Label>
+                    <Form.Control className={ClassFirstname} style={styleFirstname} ref={this.firstnameRef} type="firstname" onChange={this.handleChange} placeholder="firstname" name="firstname"></Form.Control>
                     <Form.Label className={classRegisterForm} style={styleLastname}>Lastname</Form.Label>
-                    <Form.Control className={classRegisterForm} style={styleLastname} type="lastname" onChange={this.handleChange} placeholder="lastname" name="lastname"></Form.Control>
+                    <Form.Control className={classRegisterForm} ref={this.lastnameRef} style={styleLastname} type="lastname" onChange={this.handleChange} placeholder="lastname" name="lastname"></Form.Control>
                     <Form.Label className={classRegisterForm} style={styleCell}>Cell</Form.Label>
                     <Form.Control className={classRegisterForm} style={styleCell} type="cell" onChange={this.handleChange} placeholder="cell" name="cell"></Form.Control>
                     <Form.Label className={classPaymentForm} style={styleDate}  >Date</Form.Label>
-                    <Form.Control className={classPaymentForm} style={styleDate} type="date" onChange={this.handleChange} placeholder={new Date().toLocaleDateString()} name="date" ></Form.Control>
-                    <Form.Label className={classPaymentForm} style={styleAmount}  >Amount</Form.Label>
-                    <Form.Control className={classPaymentForm} style={styleAmount} type="amount" onChange={this.handleChange} placeholder="R500.00" name="amount"></Form.Control>
+                    <Form.Control className={classPaymentForm} ref={this.date} style={styleDate} type="date" onChange={this.handleChange} placeholder={new Date().toLocaleDateString()} name="date" ></Form.Control>
+                    <Form.Label className={classPaymentForm}  style={styleAmount}  >Amount</Form.Label>
+                    <Form.Control className={classPaymentForm} ref={this.amount} style={styleAmount} type="amount" onChange={this.handleChange} placeholder="R500.00" name="amount"></Form.Control>
                     <Form.Label className={classPaymentForm} style={styleMemberId}   >Amount ID</Form.Label>
                     <Form.Control className={classPaymentForm} style={styleMemberId} type="memberid" onChange={this.handleChange} disabled="disabled" value={this.props.uniqueMemberid} name="memberid"></Form.Control>
 
                     {/**   <Form.Text className="text-Muted">Just testing </Form.Text>*/}
 
                     <Button variant="primary" style={{ "marginRight": 15, "marginBottom": 50, "marginTop": 20 }} onClick={(event) => this.MemberRegistration(event)}>{this.props.buttonText}</Button>
-                    <Button variant="primary" style={{ "marginBottom": 50, "marginTop": 20 }} onClick={() => { window.location.reload(false) }}>Cancel</Button> <br />
+                    <Button variant="primary" style={{ "marginBottom": 50, "marginTop": 20 }} onClick={(event) => {this.CancelButton(event)}}>Cancel</Button> <br />
 
                 </Form.Group>
 

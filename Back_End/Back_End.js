@@ -10,7 +10,11 @@ let bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const cors = require("cors");
+const mongoose = require("mongoose");
 app.use(cors())
+
+const Pfuxanai_StokvelModel = require("../models/Stokvel");
+const { response } = require("express");
 
 //result object
 
@@ -41,6 +45,51 @@ SendeErrorResponse = (p_Error,res)=>{
     return res.send(JSON.stringify(resultObject));
 }
 
+
+//------------------------------------------------------------------------------------
+//Connect to mogoose database
+//Mongo db password: Learning123*$
+//const MONGODB_URI = "mongodb+srv://Kulani:Learning123*$@sandbox.jl9sn.mongodb.net/<dbname>?retryWrites=true&w=majority";
+//------------------------------------------------------------------------------------
+mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel',{
+useNewUrlParser:true,
+useUnifiedTopology: true
+
+})
+
+
+
+//Saving data to our mongo database
+// const data = {
+//     firstname: "Kulani",
+//     lastname: "Ngobeni",
+//     cell: "0112020333",
+//     amount: 22000.00
+// }
+
+//use .save method in order to save data into the database
+//Create a new instance of Pfuxanai_StokvelModel
+//const newStokvelMember = new Pfuxanai_StokvelModel(data);
+
+
+// newStokvelMember.save(error=>{
+//     if(error){
+//         console.log("Ooops, something happened");
+//     }else{
+
+//         console.log("Data has been saved!!");
+//     }
+
+  
+// })
+
+
+//use on listener event to check if mongoose has been connected
+
+mongoose.connection.on("connected",()=>{
+
+    console.log("Mongoose is connected!")
+})
 
 //Connect to the database
 //------------------------------------------------------------------------------------
@@ -74,8 +123,92 @@ let DatabaseConnection = async () => {
 
 }
 
+app.get("/", (req, res) => {
+
+    Pfuxanai_StokvelModel.find({})
+    .then(p_Data =>{
+
+        console.log("Data " + p_Data);
+        
+        SendResultsResponse(p_Data,res);
+
+    })
+    .catch(p_Error=>{
+
+        console.log("Error " + p_Error)
+    })
+
+})
+
+app.post("/insert",(req,res)=>{
+
+    const {firstname,lastname,cell} =  req.body.member;
+
+    req.body.member.amount = 00; 
+    req.body.member.date = "2020-05-07"; 
+
+    const newStokvelMember = new Pfuxanai_StokvelModel(req.body.member);
+
+    newStokvelMember.save(p_Error=>{
+
+        if(p_Error){
+
+            console.log("Error " + p_Error);
+        }else{
+
+            console.log("That was successfully added");
+
+            SendResultsResponse("That was successfully added",res)
+        }
+    })
 
 
+
+})
+
+app.post("/Payment",(req,res)=>{
+
+    console.log(req.body.member);
+    let memberid = req.body.member.memberid;
+    let amountUpdated = req.body.member.amount;
+    let updatedDate = req.body.member.date;
+
+    Pfuxanai_StokvelModel.findOne({_id: memberid}, (error, response)=>{
+
+        if(error){
+
+            console.log("There was an error " +error);
+        }
+
+        console.log(response.amount);
+        
+
+    
+
+
+
+        console.log("Response " + response)
+
+        Pfuxanai_StokvelModel.updateOne({_id: memberid},{$push: {amount : amountUpdated, date : updatedDate}},(error,response)=>{
+
+            if(error){
+        
+                console.log(error)
+            }
+        
+            console.log(response);
+
+            SendResultsResponse("Amount was updated successfully ", res);
+        });
+    })
+
+
+
+  
+    
+})
+
+/*
 app.get("/", (req, res) => {
 
     let members = [
@@ -134,6 +267,8 @@ app.get("/", (req, res) => {
 
 })
 
+*/
+/*
 app.post("/insert", (req, res) => {
 
     if (req) {
@@ -219,8 +354,8 @@ app.post("/insert", (req, res) => {
     }
 })
 
-
-
+*/
+/*
 app.post("/Payment",(req,res)=>{
 
     //desctructue the object
@@ -264,7 +399,7 @@ app.post("/Payment",(req,res)=>{
 
 })
 
-
+*/
 
 
 const server = app.listen(5001, () => {
