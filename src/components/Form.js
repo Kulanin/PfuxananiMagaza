@@ -15,6 +15,8 @@ class StokvelForm extends React.Component {
         this.firstnameRef = React.createRef();
         this.date = React.createRef();
         this.amount = React.createRef();
+        this.usernameRef = React.createRef();
+        this.passwordRef = React.createRef();
 
         this.state = {
 
@@ -33,6 +35,7 @@ class StokvelForm extends React.Component {
             //End of styled background colors
             SuccessPaymentMessage: "",
             ErrorPaymentMessage: "",
+            m_disableSubmitBtn: false,
 
 
         }
@@ -72,7 +75,7 @@ class StokvelForm extends React.Component {
         }
 
 
-        if (this.props.buttonText === "Submit") {
+        if (this.props.buttonText === "Payment") {
 
             if (p_InputValueObject.date === "") {
 
@@ -170,8 +173,19 @@ class StokvelForm extends React.Component {
                     this.setState({
 
                         SuccessPaymentMessage: Response.data,
-                        ErrorPaymentMessage: ""
+                        ErrorPaymentMessage: "",
+                        m_disableSubmitBtn: true,
                     })
+
+
+                    setTimeout(() => {
+
+                        window.location.reload(false);
+                        
+                        
+                    }, 2000);
+
+         
 
                     return;
                 }
@@ -216,12 +230,7 @@ class StokvelForm extends React.Component {
 
     }
 
-    CancelButton(event){
-        window.location.reload(false)
-        event.preventDefault();
-
-      
-    }
+ 
 
 
 
@@ -248,6 +257,15 @@ class StokvelForm extends React.Component {
             "marginTop": 10,
 
         }
+
+
+            //-----------------------------------------------------------------------
+            const classLogin = {
+
+                "display": this.props.dataset ? this.props.classLogin : "block",
+                "marginTop": 10,
+    
+            }
          //-----------------------------------------------------------------------
          const styleFirstname = {
 
@@ -305,12 +323,18 @@ class StokvelForm extends React.Component {
 
 
             <Form className="classForm"   >
-
+            
+        <h2 style={{"textAlign":"center"}}>{this.state.ErrorPaymentMessage || this.state.SuccessPaymentMessage ? "": this.props.buttonText}</h2>
               <div>{this.AlertMessage(this.state.ErrorPaymentMessage ? this.state.ErrorPaymentMessage : this.state.SuccessPaymentMessage, this.state.ErrorPaymentMessage ? "danger" : "success", this.state.ErrorPaymentMessage || this.state.SuccessPaymentMessage ? true : false)}</div>  
                 <Form.Group controlId="basicForm" style={{ "margin": 30 }} >
 
                     <Form.Label className={ClassFirstname} style={styleFirstname}  >Firstname</Form.Label>
                     <Form.Control className={ClassFirstname} style={styleFirstname} ref={this.firstnameRef} type="firstname" onChange={this.handleChange} placeholder="firstname" name="firstname"></Form.Control>
+                    <Form.Label className={classLogin} style={classLogin}  >Username</Form.Label>
+                    <Form.Control className={classLogin} style={classLogin} ref={this.usernameRef} type="username" onChange={this.handleChange} placeholder="username" name="username"></Form.Control>
+                    <Form.Label className={classLogin} style={classLogin}  >Password</Form.Label>
+                    <Form.Control className={classLogin} style={classLogin} ref={this.passwordRef} type="password" onChange={this.handleChange} placeholder="password" name="password"></Form.Control>
+
                     <Form.Label className={classRegisterForm} style={styleLastname}>Lastname</Form.Label>
                     <Form.Control className={classRegisterForm} ref={this.lastnameRef} style={styleLastname} type="lastname" onChange={this.handleChange} placeholder="lastname" name="lastname"></Form.Control>
                     <Form.Label className={classRegisterForm} style={styleCell}>Cell</Form.Label>
@@ -324,8 +348,14 @@ class StokvelForm extends React.Component {
 
                     {/**   <Form.Text className="text-Muted">Just testing </Form.Text>*/}
 
-                    <Button variant="primary" style={{ "marginRight": 15, "marginBottom": 50, "marginTop": 20 }} onClick={(event) => this.MemberRegistration(event)}>{this.props.buttonText}</Button>
-                    <Button variant="primary" style={{ "marginBottom": 50, "marginTop": 20 }} onClick={(event) => {this.CancelButton(event)}}>Cancel</Button> <br />
+                    <Button variant="primary" style={{ "marginRight": 15, "marginBottom": 50, "marginTop": 20 }}
+                     onClick={(event) => this.MemberRegistration(event)}
+                     disabled={this.state.m_disableSubmitBtn}
+                     
+                     >{this.props.buttonText}
+                    
+                     </Button>
+                    <Button variant="primary" style={{ "marginBottom": 50, "marginTop": 20 }} onClick={(props) => {this.props.ToggleModalState(props,"Cancel")}}>Cancel</Button> <br />
 
                 </Form.Group>
 

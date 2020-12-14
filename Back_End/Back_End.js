@@ -49,6 +49,7 @@ SendeErrorResponse = (p_Error,res)=>{
 //------------------------------------------------------------------------------------
 //Connect to mogoose database
 //Mongo db password: Learning123*$
+//mongodb://localhost/Pfuxanai_Stokvel'
 //const MONGODB_URI = "mongodb+srv://Kulani:Learning123*$@sandbox.jl9sn.mongodb.net/<dbname>?retryWrites=true&w=majority";
 //------------------------------------------------------------------------------------
 mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel',{
@@ -156,9 +157,9 @@ app.post("/insert",(req,res)=>{
             console.log("Error " + p_Error);
         }else{
 
-            console.log("That was successfully added");
+            console.log("Member successfully registered");
 
-            SendResultsResponse("That was successfully added",res)
+            SendResultsResponse("Member successfully registered",res)
         }
     })
 
