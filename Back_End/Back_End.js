@@ -3,6 +3,7 @@ const sql = require("mssql");
 
 
 const express = require("express");
+const bcrypt = require("bcrypt");
 
 
 const app = express();
@@ -21,23 +22,23 @@ const { response } = require("express");
 let resultObject = {};
 let g_MemberId = 0;
 
-updateGlobalVariable = (p_MemberId)=>{
+updateGlobalVariable = (p_MemberId) => {
 
-        g_MemberId = p_MemberId;
+    g_MemberId = p_MemberId;
 }
 
 //------------------------------------------------------------------------------------
 //Success Response
 //------------------------------------------------------------------------------------
-SendResultsResponse = (p_Response,res)=>{
+SendResultsResponse = (p_Response, res) => {
 
     delete resultObject.error;
     resultObject.data = p_Response;
 
-return res.send(JSON.stringify(resultObject));
+    return res.send(JSON.stringify(resultObject));
 }
 
-SendeErrorResponse = (p_Error,res)=>{
+SendErrorResponse = (p_Error, res) => {
 
     resultObject.error = p_Error;
     delete resultObject.data;
@@ -50,11 +51,11 @@ SendeErrorResponse = (p_Error,res)=>{
 //Connect to mogoose database
 //Mongo db password: Learning123*$
 //mongodb://localhost/Pfuxanai_Stokvel'
-
+//const MONGODB_URI = "mongodb+srv://Kulani:Learning123*$@sandbox.jl9sn.mongodb.net/<dbname>?retryWrites=true&w=majority";
 //------------------------------------------------------------------------------------
-mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel',{
-useNewUrlParser:true,
-useUnifiedTopology: true
+mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 
 })
 
@@ -64,13 +65,15 @@ useUnifiedTopology: true
 // const data = {
 //     firstname: "Kulani",
 //     lastname: "Ngobeni",
+//     password:"password",
 //     cell: "0112020333",
-//     amount: 22000.00
+//     amount: 22000.00,
+
 // }
 
-//use .save method in order to save data into the database
-//Create a new instance of Pfuxanai_StokvelModel
-//const newStokvelMember = new Pfuxanai_StokvelModel(data);
+// //use .save method in order to save data into the database
+// //Create a new instance of Pfuxanai_StokvelModel
+// const newStokvelMember = new Pfuxanai_StokvelModel(data);
 
 
 // newStokvelMember.save(error=>{
@@ -81,13 +84,13 @@ useUnifiedTopology: true
 //         console.log("Data has been saved!!");
 //     }
 
-  
+
 // })
 
 
 //use on listener event to check if mongoose has been connected
 
-mongoose.connection.on("connected",()=>{
+mongoose.connection.on("connected", () => {
 
     console.log("Mongoose is connected!")
 })
@@ -127,87 +130,221 @@ let DatabaseConnection = async () => {
 app.get("/", (req, res) => {
 
     Pfuxanai_StokvelModel.find({})
-    .then(p_Data =>{
+        .then(p_Data => {
 
-        console.log("Data " + p_Data);
-        
-        SendResultsResponse(p_Data,res);
+            console.log("Data " + p_Data);
 
-    })
-    .catch(p_Error=>{
+            SendResultsResponse(p_Data, res);
 
-        console.log("Error " + p_Error)
-    })
+        })
+        .catch(p_Error => {
+
+            console.log("Error " + p_Error)
+        })
 
 })
 
-app.post("/insert",(req,res)=>{
+app.post("/insert", async (req, res) => {
 
-    const {firstname,lastname,cell} =  req.body.member;
+    const { firstname, lastname, cell, password1 } = req.body.member;
 
-    req.body.member.amount = 00; 
-    req.body.member.date = "2020-05-07"; 
+    Pfuxanai_StokvelModel.findOne({ username: req.body.member.username }, async (error, response) => {
 
-    const newStokvelMember = new Pfuxanai_StokvelModel(req.body.member);
+        if (error) {
 
-    newStokvelMember.save(p_Error=>{
-
-        if(p_Error){
-
-            console.log("Error " + p_Error);
-        }else{
-
-            console.log("Member successfully registered");
-
-            SendResultsResponse("Member successfully registered",res)
+            console.log("Error");
         }
+
+        if (response) {
+
+            SendErrorResponse("Username already exists, please choose another one!", res);
+        } else {
+
+            req.body.member.amount = 00;
+            req.body.member.date = "2020-05-07";
+            try {
+                const salt = await bcrypt.genSalt();
+                const hashedPassword = await bcrypt.hash(password1, salt);
+                req.body.member.password = hashedPassword;
+                console.log(salt);
+                console.log(hashedPassword);
+
+                const newStokvelMember = new Pfuxanai_StokvelModel(req.body.member);
+
+                newStokvelMember.save(p_Error => {
+            
+                    if (p_Error) {
+            
+                        console.log("Error " + p_Error);
+                    } else {
+            
+                        console.log("Member successfully registered");
+            
+                        SendResultsResponse("Member successfully registered", res)
+                    }
+                })
+
+
+            } catch {
+                SendResultsResponse("There was an error", res);
+            }
+        }
+
     })
 
 
 
 })
 
-app.post("/Payment",(req,res)=>{
+app.post("/Payment", (req, res) => {
 
     console.log(req.body.member);
     let memberid = req.body.member.memberid;
     let amountUpdated = req.body.member.amount;
     let updatedDate = req.body.member.date;
 
-    Pfuxanai_StokvelModel.findOne({_id: memberid}, (error, response)=>{
+    Pfuxanai_StokvelModel.findOne({ _id: memberid }, (error, response) => {
 
-        if(error){
+        if (error) {
 
-            console.log("There was an error " +error);
+            console.log("There was an error " + error);
         }
 
         console.log(response.amount);
-        
-
-    
-
-
-
         console.log("Response " + response)
 
-        Pfuxanai_StokvelModel.updateOne({_id: memberid},{$push: {amount : amountUpdated, date : updatedDate}},(error,response)=>{
+        Pfuxanai_StokvelModel.updateOne({ _id: memberid }, { $push: { amount: amountUpdated, date: updatedDate } }, (error, response) => {
 
-            if(error){
-        
+            if (error) {
+
                 console.log(error)
             }
-        
+
             console.log(response);
 
             SendResultsResponse("Amount was updated successfully ", res);
         });
     })
 
+})
+
+//----------------------------------------------------------
+/*Memebers login route */
+//----------------------------------------------------------
+
+app.post("/members/login", async (req, res) => {
+
+    console.log(req.body.member.username);
+
+    let password = "";
+    
 
 
-  
+    Pfuxanai_StokvelModel.findOne({ username: req.body.member.username }, async (error, response) => {
+
+        if (error) {
+
+            console.log("There was an error " + error);
+        }
+
+      
+
+        if(response === null){
+
+            SendErrorResponse("username not found!", res)
+
+        }else{
+
+            password = response.password;
+
+            try {
+
+                if (await bcrypt.compare(req.body.member.password, password)) {
+
+
+                    let data = {
+                        "data": response,
+                        "message": "You have successfull logged in"
+
+                    }
+                    
+                    SendResultsResponse(data, res);
+                } else {
+    
+                    SendErrorResponse("username or password is incorrect!", res)
+                }
+    
+            } catch {
+    
+                SendErrorResponse("username or password is incorrect!", res)
+            }
+        }
+    
+        })
     
 })
+
+
+
+
+
+// const  users = [];
+
+// app.get("/users",(req,res)=>{
+
+
+//     res.json(users)
+// })
+
+// app.post("/users",async (req,res)=>{
+
+//     try{
+
+//         const salt = await bcrypt.genSalt();
+//         const hashedPassword =  await bcrypt.hash(req.body.password,salt);
+//         console.log(salt);
+//         console.log(hashedPassword);
+
+//         const user =  {name: req.body.name, password: hashedPassword}
+//         users.push(user);
+//         res.status(201).send();
+
+
+//     }catch{
+
+//         res.status(500).send();
+
+//     }
+
+
+// })
+
+
+// app.post("/users/login", async(req,res)=>{
+
+//     const user = users.find(user=>user.name === req.body.name);
+
+//     if(user === null){
+//         return res.status(400).send("Cannot find user");
+//     }
+
+//     try{
+
+//       if(await bcrypt.compare(req.body.password, user.password)){
+
+//         res.send("Success");
+//       }else{
+
+//         res.send("Not Allowed")
+//       }
+
+//     }catch{
+
+//         return res.status(400).send();
+//     }
+// })
+
+
 
 /*
 app.get("/", (req, res) => {
@@ -316,7 +453,7 @@ app.post("/insert", (req, res) => {
                     if (error) {
     
                         console.log("There was an error inserting the data " + error);
-                        SendeErrorResponse("There was an error inserting the data ",error);
+                        SendErrorResponse("There was an error inserting the data ",error);
                         return;
                     }
 
@@ -388,7 +525,7 @@ app.post("/Payment",(req,res)=>{
             if(error){
 
                 console.log("There was an error inserting data into the db");
-               return SendeErrorResponse("There was an error inserting data into the db",res);
+               return SendErrorResponse("There was an error inserting data into the db",res);
             }
 
                return SendResultsResponse("Amount was updated successfully",res)

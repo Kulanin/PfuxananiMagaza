@@ -7,6 +7,8 @@ const Pfuxanai_Stokvel = new Schema({
 
     firstname: String,
     lastname: String,
+    password: String,
+    username: String,
     cell: String,
     date: [String],
     amount: [Number]  

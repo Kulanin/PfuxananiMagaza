@@ -51,7 +51,7 @@
 
   background-color: rgba(255, 255, 255, 0.123);
   display: grid;
-  grid-template-columns: 18rem 18rem 18rem 18rem 18rem;
+  grid-template-columns: 18rem 18rem 18rem 18rem 18rem 18rem;
   gap: 20px;
   
 
@@ -118,8 +118,23 @@ margin-right: 20px;
 .classHeaderList ul{
   list-style-type: none;
   display: grid;
-  grid-template-columns: auto 100px 100px auto;
+  grid-template-columns: auto auto auto auto;
   gap: 10px;
   justify-self: end;
   
+}
+
+.classPersonalDetails{
+
+
+  height: 800px;
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto  auto  auto  auto auto;
+  background-color: white;
+
+
+
+
+
 }
