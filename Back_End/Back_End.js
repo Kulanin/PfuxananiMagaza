@@ -47,11 +47,7 @@ SendErrorResponse = (p_Error, res) => {
 }
 
 
-//------------------------------------------------------------------------------------
-//Connect to mogoose database
-//Mongo db password: Learning123*$
-//mongodb://localhost/Pfuxanai_Stokvel'
-//const MONGODB_URI = "mongodb+srv://Kulani:Learning123*$@sandbox.jl9sn.mongodb.net/<dbname>?retryWrites=true&w=majority";
+
 //------------------------------------------------------------------------------------
 mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel', {
     useNewUrlParser: true,
