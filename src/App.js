@@ -1,4 +1,5 @@
 import React, { Component } from "react"
+import Axios from 'axios';
 import logo from './logo.svg';
 import './App.css';
 import { Button } from 'react-bootstrap';
@@ -8,12 +9,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import StokvelForm from "./components/Form"
 import Table from 'react-bootstrap/Table'
 import { createBrowserHistory } from 'history';
+const { Form,  } = require("react-bootstrap");
+
 
 
 
 //------------------------------------------------------------------------
 //Header List #Login Register myAccount
 //------------------------------------------------------------------------
+
+
+
 
 function HeaderList(props) {
 
@@ -34,7 +40,8 @@ function HeaderList(props) {
         </a>
         </li>
         <li style={{ "display": localStorage.getItem("mySessionDataStorageFirstname") ? "none" : "block" }} ><a href="#" onClick={() => props.ToggleModalState(props, "register")} >{props.m_LoginStatus ? "" : "Register"}</a></li>
-        <li ><a href="#" onClick={() => props.ToggleModalState(props, "Myaccount")} >My Account</a></li>
+        <li ><a href="#" onClick={() => props.ToggleModalState(props, "Myaccount")} >{localStorage.getItem("mySessionDataStorageFirstname") ? "My Account" : ""}</a></li>
+       {/*  <li ><a href="#" onClick={() => props.ToggleModalState(props, "UploadImaged")} >Upload Imaged</a></li>*/}
       </ul>
     </div>
   )
@@ -49,7 +56,22 @@ function HeaderList(props) {
 //------------------------------------------------------------------------
 function PersonalDetails(props) {
 
+  const members = props.members;
+  let g_Firstname = "";
+  let g_Surname = "";
+
+  members.map((value, index) => {
+
+    if(value._id === localStorage.getItem("mySessionDataStorageId")){
+
+      g_Firstname = value.firstname;
+      g_Surname = value.lastname;
+    }
+  })  
+
   return (
+
+   
     <div className="classPersonalDetails" style={{"display":props.m_Myaccount}} >
 
 <h1>Personal Details</h1> 
@@ -57,19 +79,32 @@ function PersonalDetails(props) {
 
         <div style={{ "justifySelf": "start", "margin": "20px 20px 20px", }}>
           <h3>Your name</h3>
-          <p style={{ "fontSize": 22 }}>Kulani</p>
+          <p style={{ "fontSize": 22 }}>{g_Firstname}</p>
         </div>
-        <Button style={{ "width": 200, "height": 50, "margin": "40px 20px 20px", "justifySelf": "end" }}>Edit</Button>
+        <Button style={{ "width": 200, "height": 50, "margin": "40px 20px 20px", "justifySelf": "end" }} onClick={()=>props.ToggleModalState(props,"UpdateName")} >Edit</Button>
       </div>
 
       <div style={{ "background": "#eceff5", "display": "grid", "gridTemplateColumns": "auto auto", "marginTop":20 }}>
 
         <div style={{ "justifySelf": "start", "margin": "20px 20px 20px", }}>
           <h3>Surname</h3>
-          <p style={{ "fontSize": 22 }}>Ngobeni</p>
+          <p style={{ "fontSize": 22 }}>{g_Surname}</p>
         </div>
         <Button style={{ "width": 200, "height": 50, "margin": "40px 20px 20px", "justifySelf": "end" }}>Edit</Button>
       </div>
+      
+
+      <div style={{ "background": "#eceff5", "display": "grid", "gridTemplateColumns": "auto auto", "marginTop":20 }}>
+
+<div style={{ "justifySelf": "start", "margin": "20px 20px 20px", }}>
+  <h3>Upload Image</h3>
+  {/*<p style={{ "fontSize": 22 }}>Ngobeni</p>*/}
+</div>
+<Button style={{ "width": 200, "height": 50, "margin": "40px 20px 20px", "justifySelf": "end" }}  onClick={()=>props.ToggleModalState(props,"UploadImaged")} >Edit</Button>
+</div>
+
+
+
 
       <div style={{ "background": "#eceff5", "display": "grid", "gridTemplateColumns": "auto auto", "marginTop":20}}>
 
@@ -91,6 +126,8 @@ function PersonalDetails(props) {
       </div>
 */} 
     </div>
+
+
   )
 }
 
@@ -138,6 +175,8 @@ function FormModal(props) {
           headerRef={props.headerRef}
           ToggleModalState={props.ToggleModalState}
           m_LoginStatus={props.m_LoginStatus}
+          m_UploadImage={props.m_UploadImage}
+          
 
 
         />
@@ -252,16 +291,16 @@ function Members(props) {
 
           console.log("id: " + value._id);
           console.log("Session name" + localStorage.getItem("mySessionDataStorageFirstname"));
-          return <Card className="c_membersContainer" style={{ "width": "18rem", "cursor": "pointer" }}  >
-            <Card.Img variant="top"
-              src={`/images/${value.firstname}.jpg`}
+          return <Card className="c_membersContainer" style={{ "width": "20rem", "maxWidth": "18rem", "cursor":  localStorage.getItem("mySessionDataStorageId") === value._id ? "pointer" :""}}  >
+            <Card.Img variant="top" style={{"height": "20rem"}}
+              src={`http://localhost:5001/${value._id}.jpg`}
               onClick={localStorage.getItem("mySessionDataStorageId") === value._id ? () => props.ToggleMemberTable(props, value) : ""}
 
             ></Card.Img>
             <Card.Body>
               <Card.Title>{value.firstname} {value.lastname}</Card.Title>
               {/*<Card.Text id={index} >Cell : {value.cell}</Card.Text> */}
-              <Card.Text id={index}>Total Contribution : {localStorage.getItem("mySessionDataStorageId") === value._id ? `R ${sum}` : ""}</Card.Text>
+              <Card.Text id={index}>Total Contribution : {localStorage.getItem("mySessionDataStorageId") === value._id ? `R ${sum} .00`  : ""}</Card.Text>
             </Card.Body>
             <Button disabled={localStorage.getItem("mySessionDataStorageId") === value._id ? props.ModalState : props.m_DisablePaymentBtn} variant="primary" onClick={() => props.ToggleModalState(props, value._id)}>Add Amount</Button>
           </Card >
@@ -324,6 +363,7 @@ class App extends React.Component {
       m_LoginStatus: "",
       m_DisablePaymentBtn: true,
       m_Myaccount: "none",
+      m_UploadImage: "none",
 
 
       dataset: g_MemberList
@@ -395,7 +435,7 @@ class App extends React.Component {
 
 
 
-    if (p_Value.message === "You have successfull logged in") {
+    if (p_Value.message === "You have successfully logged in") {
 
       console.log("Kulani" + p_Value.firstname);
 
@@ -417,7 +457,10 @@ class App extends React.Component {
           classRegisterForm: "none",
           classPaymentForm: "none",
           classLogin: "none",
-          m_Myaccount: "none"
+          m_Myaccount: "none",
+          m_UploadImage: "none",
+          displayMembersDiv: "block",
+          
         })
 
         // window.location.reload(false);
@@ -430,7 +473,8 @@ class App extends React.Component {
           displayMembersDiv: "block",
           displayTable: "none",
           classPaymentForm: "none",
-          m_Myaccount: "none"
+          m_Myaccount: "none",
+          m_UploadImage: "none",
         })
 
         // window.location.reload(false);
@@ -445,7 +489,8 @@ class App extends React.Component {
           classPaymentForm: "none",
           buttonText: "Register Now",
           displayTable: "none",
-          m_Myaccount: "none"
+          m_Myaccount: "none",
+          m_UploadImage: "none"
 
         });
         break;
@@ -461,7 +506,20 @@ class App extends React.Component {
           });
           break;
 
-        
+          case "UploadImaged":
+            this.setState({
+              ModalState: !this.state.ModalState,
+              m_UploadImage: "block",
+               displayMembersDiv: "block",
+              buttonText: "Upload Image",
+              classRegisterForm: "none",
+              classPaymentForm: "none",
+              displayTable: "none",
+              m_Myaccount: "none",
+            
+            });
+            
+            break;
 
       case "login":
         this.setState({
@@ -469,7 +527,8 @@ class App extends React.Component {
           classLogin: "block",
           buttonText: "Login",
           displayTable: "none",
-          m_Myaccount: "none"
+          m_Myaccount: "none",
+          m_UploadImage: "none",
 
         });
         break;
@@ -480,11 +539,27 @@ class App extends React.Component {
         localStorage.removeItem("mySessionDataStorageId");
         this.setState({
           ModalState: this.state.ModalState,
+          displayMembersDiv: "block",
+          m_Myaccount: "none",
 
         });
-
-
         break;
+
+        case "UpdateName":
+          this.setState({
+            ModalState: this.state.ModalState,
+            displayMembersDiv: "block",
+            buttonText: "Update",
+            m_Myaccount: "none",
+            classRegisterForm: "none",
+            classPaymentForm: "none",
+            displayTable: "none",
+          
+  
+          });
+          break;
+
+
 
       default:
 
@@ -495,6 +570,7 @@ class App extends React.Component {
           buttonText: "Payment",
           displayTable: "none",
           m_Myaccount: "none"
+          
         });
         break;
 
@@ -611,7 +687,7 @@ class App extends React.Component {
     const { m_count, dataset, FetchError } = this.state;
     //if dataset length is empty we try every second to fetch the data again. 
     //If there is data from the back-end we clear the interval immediately
-    if (dataset.length === 0 && m_count <= 3) {
+    if (dataset.length === 0 && m_count <= 10) {
 
       this.FetchDataFromTheBackEnd();
 
@@ -620,8 +696,8 @@ class App extends React.Component {
       this.ClearInterval(g_IntervalId);
     }
 
-    //After waiting for 10 seconds we stop trying and display conection error. 
-    if (m_count > 3 && dataset.length === 0 && FetchError === "") {
+    //After waiting for 10 seconds we stop trying and display connection error. 
+    if (m_count > 10 && dataset.length === 0 && FetchError === "") {
 
       this.ClearInterval(g_IntervalId);
 
@@ -675,10 +751,12 @@ class App extends React.Component {
           EachMember={this.state.EachMember}
           ToggleModalState={this.ToggleModalState}
           m_Myaccount={this.state.m_Myaccount}
+          members={this.state.dataset}
+          
         />
         <h1>{this.state.FecthError}</h1>
 
-        <div style={{ "display": this.state.displayMembersDiv }}>
+        <div style={{ "display": this.state.displayMembersDiv }}  >
           <Members members={this.state.dataset}
             ToggleModalState={this.ToggleModalState}
             ToggleMemberTable={this.ToggleMemberTable}
@@ -699,6 +777,8 @@ class App extends React.Component {
           ToggleModalState={this.ToggleModalState}
           m_LoginStatus={this.state.m_LoginStatus}
           m_Myaccount={this.state.m_Myaccount}
+          m_UploadImage={this.state.m_UploadImage}
+          
           
 
 
@@ -710,6 +790,7 @@ class App extends React.Component {
           ToggleModalState={this.ToggleModalState}
 
         />
+
 
         <PfuxananiHistory />
 

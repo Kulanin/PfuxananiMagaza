@@ -1,9 +1,11 @@
 const config = require("./config.json");
 const sql = require("mssql");
+require('dotenv').config();
 
 
 const express = require("express");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
 
 
 const app = express();
@@ -16,6 +18,42 @@ app.use(cors())
 
 const Pfuxanai_StokvelModel = require("../models/Stokvel");
 const { response } = require("express");
+const { find } = require("../models/Stokvel");
+
+const fs = require("fs");
+
+const storage = multer.diskStorage({
+    destination: function (req,file,cb){
+        cb(null, __dirname + '/membersImages/')
+
+    },
+    filename: function (req,file,cb){
+
+        
+
+        cb(null,file.originalname)
+
+    }
+})
+
+const fileFilter = function (req,file,cb){
+
+    if(file.mimetype === "image/jpeg" || file.mimetype === "image/png"){
+        cb(null,true);
+    }else{
+
+        cb(null,false);
+    }
+}
+
+const upload =  multer({
+    storage: storage,
+    limits: {
+    fileSize: 1024 * 1024  * 5
+},  fileFilter: fileFilter
+
+});
+
 
 //result object
 
@@ -26,6 +64,11 @@ updateGlobalVariable = (p_MemberId) => {
 
     g_MemberId = p_MemberId;
 }
+
+
+console.log(__dirname + "/membersImages/")
+
+app.use(express.static(__dirname + '/membersImages/')); //Serves resources from membersImages folder
 
 //------------------------------------------------------------------------------------
 //Success Response
@@ -47,9 +90,8 @@ SendErrorResponse = (p_Error, res) => {
 }
 
 
-
 //------------------------------------------------------------------------------------
-mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/Pfuxanai_Stokvel', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 
@@ -59,8 +101,8 @@ mongoose.connect('mongodb://localhost/Pfuxanai_Stokvel', {
 
 //Saving data to our mongo database
 // const data = {
-//     firstname: "Kulani",
-//     lastname: "Ngobeni",
+//     firstname: "Kulani22",
+//     lastname: "Ngobeni22",
 //     password:"password",
 //     cell: "0112020333",
 //     amount: 22000.00,
@@ -142,6 +184,8 @@ app.get("/", (req, res) => {
 
 app.post("/insert", async (req, res) => {
 
+
+
     const { firstname, lastname, cell, password1 } = req.body.member;
 
     Pfuxanai_StokvelModel.findOne({ username: req.body.member.username }, async (error, response) => {
@@ -188,6 +232,67 @@ app.post("/insert", async (req, res) => {
 
     })
 
+
+
+
+})
+
+//--------------------------------------------------------------------
+/**Update personal information */
+//--------------------------------------------------------------------
+
+app.post("/Update",(req,res)=>{
+
+    console.log(req.body);
+})
+
+app.post("/profileImage", upload.single("file","_id"), (req, res,next) => {
+
+    //console.log("id " + req.body._id);
+    //console.log("originalname" + req.file.originalname);
+    let dirKulani = __dirname + "/membersImages/";
+  
+    if(req.file === undefined){
+
+        return  SendErrorResponse("You have not selected an image!",res);
+    
+    }
+
+
+    fs.readdir(dirKulani,(error,files)=>{
+
+        if(error){
+
+            console.log(error);
+
+            return SendErrorResponse("Could not read image directory", res)
+        }
+
+        files.forEach(file=>{
+            console.log(file)
+
+            if(file === req.file.originalname){
+
+                console.log("FIles are the same")
+
+                fs.rename(dirKulani + file, dirKulani + req.body._id + ".jpg",(error)=>{
+
+                    if(error){
+
+                        console.log(error);
+                        return SendErrorResponse("Member image could not be uploaded by Kulani",res)
+                        
+                    }
+                
+                    return SendResultsResponse("Member Image successfully uploaded", res)
+                      
+                });
+            }
+        })
+    })
+
+ 
+  
 
 
 })
@@ -260,19 +365,19 @@ app.post("/members/login", async (req, res) => {
 
                     let data = {
                         "data": response,
-                        "message": "You have successfull logged in"
+                        "message": "You have successfully logged in"
 
                     }
                     
-                    SendResultsResponse(data, res);
+                   return SendResultsResponse(data, res);
                 } else {
     
                     SendErrorResponse("username or password is incorrect!", res)
                 }
     
-            } catch {
+            } catch(p_Error) {
     
-                SendErrorResponse("username or password is incorrect!", res)
+                SendErrorResponse("username or password is incorrect! " + p_Error, res)
             }
         }
     
@@ -535,8 +640,14 @@ app.post("/Payment",(req,res)=>{
 
 */
 
+if(process.env.NODE_ENV === "production"){
 
-const server = app.listen(5001, () => {
+    app.use(express.static("client/build"))
+}
+
+const PORT_Number = process.env.PORT || 5001;
+
+const server = app.listen(PORT_Number, () => {
 
     let host = server.address().address;
     let port = server.address().port;

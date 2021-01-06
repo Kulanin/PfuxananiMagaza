@@ -1,10 +1,56 @@
 
+import Axios from 'axios';
 import React from 'react';
 import Alert from 'react-bootstrap/Alert'
 import './Form.css'
 const { Form, Button } = require("react-bootstrap");
 
+//let g_fileName = "";
 
+/*
+//------------------------------------------------------------------------
+//Profile image send component
+//------------------------------------------------------------------------
+async function sendProfileImage(){
+
+    let formData = new FormData();
+    let image = document.getElementById("KulaniImage"); 
+    //formData.append("profileImage","C:\Users\Kulanin\Pictures\Saved Pictures");
+    formData.append("file",image.files[0]);
+    let url = "http://127.0.0.1:5001/profileImage";
+     //headers: { "Content-Type": "application/json" },
+    let requestOptions = {
+      method: "POST",
+      body: formData,
+      
+    };
+
+    console.log(image.files[0]);
+    let data  =  await fetch(url,requestOptions);
+  
+  
+    let Response = await data.json();
+  }
+  
+  function TestForm(props){
+  
+    return(
+  
+    <div>
+    <form controlId="basicForm" 
+    style={{ "margin": "auto","backgroundColor":"white", "border":"solid black 1px",
+    "height":"300px","width":"50%", "display":props.m_UploadImage}}
+ >
+         <h3 >Upload Image</h3> <br/>
+          <input  type="file" id="KulaniImage"  placeholder="profileImage" />
+          <button onClick={sendProfileImage} value="Upload">Upload</button>
+          </form>
+  
+    </div>
+  
+  )
+  }
+*/
 class StokvelForm extends React.Component {
 
     constructor(props) {
@@ -19,6 +65,7 @@ class StokvelForm extends React.Component {
         this.passwordRef = React.createRef();
         this.passwordRef1 = React.createRef();
         this.passwordRef2 = React.createRef();
+        this.profileImage = React.createRef();
 
         this.state = {
 
@@ -32,6 +79,7 @@ class StokvelForm extends React.Component {
             password2: "",
             parssword:"",
             username: "",
+            m_UploadImage:"",
             //below usued to manipulate form control background colors
             FirstnameBorderColor: "",
             LastnameBorderColor: "",
@@ -200,14 +248,16 @@ class StokvelForm extends React.Component {
 
     }
 
-    async MemberRegistration(event,props) {
+    async MemberRegistration(e,props) {
+      
+        
 
         let memberObject = {};
         let url = "";
 
 
-
-        console.log("username" + this.state.username);
+        //console.log("Image" + this.state.m_UploadImage);
+        //console.log("username" + this.state.username);
 
         //memberObject.memberid = this.state.memberid;
         memberObject.memberid = this.props.uniqueMemberid;
@@ -220,6 +270,9 @@ class StokvelForm extends React.Component {
         memberObject.password2 = this.state.password2;
         memberObject.username = this.state.username;
         memberObject.password = this.state.password;
+       // memberObject.profileImage = this.state.m_UploadImage;
+
+       
 
         if(memberObject.username === ""){
 
@@ -237,32 +290,65 @@ class StokvelForm extends React.Component {
             let urlPayment = "http://127.0.0.1:5001/Payment";
             let urlLogin = "http://127.0.0.1:5001/members/login";
 
-            url = this.props.uniqueMemberid ? urlPayment : memberObject.username && memberObject.password  ? urlLogin : urlRegister;
+            url = this.props.uniqueMemberid ? urlPayment : this.props.buttonText === "Login" && memberObject.username && memberObject.password  ? urlLogin : urlRegister;
 
+            let formData = new FormData();
+            let file = document.getElementById("KulaniImage2");
+           
+            let fileObject = file.files[0];
+
+           // fileObject.originalname = localStorage.getItem("mySessionDataStorageId");
+          
+        
+            formData.append("file",fileObject);  
+            formData.append("_id",localStorage.getItem("mySessionDataStorageId"))
+            //formData.set("id", localStorage.getItem("mySessionDataStorageId"));
+
+        
+
+            console.log(this.props.m_UploadImage)
+            
             let requestOptions = {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-
-                    member: memberObject,
-                }),
-
+                headers: !this.props.m_UploadImage === "block"  ? "" : { "Content-Type": "application/json" },
+                body: this.props.m_UploadImage  === "block" ? formData : JSON.stringify({member: memberObject}),
+                 
+             
             };
 
+          
+            
+
+
             try {
+
+                if(this.props.m_UploadImage  === "block"){
+
+                    delete requestOptions.headers;
+                    url = "http://127.0.0.1:5001/profileImage";
+                    
+                    
+                   
+    
+                } 
+
+                //let data  =  Axios.post(url,formData)
+
                 let data = await fetch(url, requestOptions);
+              
                 let Response = await data.json();
 
                 console.log(Response.data);
 
                 if (Response.data) {
 
-                    if (Response.data.message === "You have successfull logged in") {
+                    if (Response.data.message === "You have successfully logged in") {
 
                         this.props.ToggleModalState(props,Response.data);
                         localStorage.setItem("username",memberObject.username );
                         localStorage.setItem("password", memberObject.password);
                     }
+                    
                     this.setState({
 
                         SuccessPaymentMessage: Response.data.message ? Response.data.message : Response.data,
@@ -270,17 +356,21 @@ class StokvelForm extends React.Component {
                         m_disableSubmitBtn: true,
                     })
 
+         
                     setTimeout(() => {
 
                         window.location.reload(false);
                         
-                    }, 1000);
-
+                    }, 1500);
          
                     //sessionStorage.setItem("mySessionDataStorage","Hi " + Response.data.data.firstname + ` (that's not me)`)
-                    localStorage.setItem("mySessionDataStorageFirstname",Response.data.data.firstname);
-                    localStorage.setItem("mySessionDataStorageId",Response.data.data._id);
+                    if (Response.data.message != "Member Image successfully uploaded"){
+                        localStorage.setItem("mySessionDataStorageFirstname",Response.data.data.firstname);
+                        localStorage.setItem("mySessionDataStorageId",Response.data.data._id);
+
+                    }
                     
+                  
                     return;
                 }
                 else if (Response.error) {
@@ -290,7 +380,20 @@ class StokvelForm extends React.Component {
                         SuccessPaymentMessage: ""
                     })
 
+                    setTimeout(() => {
+
+                        window.location.reload(false);
+                        
+                    }, 1500);
+
                     return;
+                }else if(Response.error === undefined){
+
+                    this.setState({
+
+                        ErrorPaymentMessage: "File was not renamed properly",
+                        SuccessPaymentMessage: ""
+                    })
                 }
 
             }
@@ -320,6 +423,16 @@ class StokvelForm extends React.Component {
             localStorage.removeItem("password") 
         }
 
+        // if(name ==="m_UploadImage"){
+            
+        //     const value = event.target.files;
+        //     //g_fileName = value;
+        //     this.setState({
+        //         m_UploadImage: value,
+        //     })
+        // }
+
+
       
 
         this.setState({ [name]: value,
@@ -338,6 +451,8 @@ class StokvelForm extends React.Component {
 
 
     render() {
+
+        console.log("Kulani upload form", this.props.m_UploadImage)
 
         const classPaymentForm = {
 
@@ -419,6 +534,14 @@ class StokvelForm extends React.Component {
 
         }
 
+        const styleUploadForm = {
+
+            "display": this.props.m_UploadImage,
+        
+        }
+
+        
+
   
 
         console.log("KulanUniqueID" + this.props.uniqueMemberid)
@@ -458,8 +581,15 @@ class StokvelForm extends React.Component {
                     <Form.Label className={classRegisterForm} style={styleLastname}>Password</Form.Label>
                     <Form.Control className={classRegisterForm} ref={this.passwordRef1} style={styleLastname} type="password1" onChange={this.handleChange} placeholder="password" name="password1"></Form.Control>
 
+                 
                     <Form.Label className={classRegisterForm} style={styleLastname}>Retype Password</Form.Label>
                     <Form.Control className={classRegisterForm} ref={this.passwordRef2} style={styleLastname} type="password2" onChange={this.handleChange} placeholder="password" name="password2"></Form.Control>
+
+                    
+                    {/*<Form.Label className={styleUploadForm} style={styleUploadForm}>Upload Image</Form.Label>*/}
+                   <Form.Control className={styleUploadForm} ref={this.profileImage} id="KulaniImage2" style={styleUploadForm} type="file" onChange={this.handleChange} placeholder="profileImage" name="file"></Form.Control>
+                   <Form.Control className={styleUploadForm}  id="KulaniImage3" style={styleUploadForm} type="hidden" onChange={this.handleChange} placeholder="profileImage" name="_id"></Form.Control>
+                    
 
                     <Form.Label className={classPaymentForm} style={styleDate}  >Date</Form.Label>
                     <Form.Control className={classPaymentForm} ref={this.date} style={styleDate} type="date" onChange={this.handleChange} placeholder={new Date().toLocaleDateString()} name="date" ></Form.Control>
@@ -472,8 +602,8 @@ class StokvelForm extends React.Component {
                     */}
                     {/**   <Form.Text className="text-Muted">Just testing </Form.Text>*/}
 
-                    <Button variant="primary" style={{ "marginRight": 15, "marginBottom": 50, "marginTop": 20 }}
-                     onClick={(event) => this.MemberRegistration(event)}
+                    <Button variant={this.props.buttonText === "Upload Image" ? "danger" :"primary"} style={{ "marginRight": 15, "marginBottom": 50, "marginTop": 20 }}
+                     onClick={(e) => this.MemberRegistration(e)}
                      disabled={this.state.m_disableSubmitBtn}
                      
                      >{this.props.buttonText}
@@ -482,6 +612,7 @@ class StokvelForm extends React.Component {
                     <Button variant="primary" style={{ "marginBottom": 50, "marginTop": 20 }} onClick={(props) => {this.props.ToggleModalState(props,"Cancel")}}>Cancel</Button> <br />
 
                 </Form.Group>
+
 
             </Form>
         )

@@ -1,6 +1,9 @@
 .App {
   text-align: center;
-  height: 1050px;
+  height: auto;
+  overflow-x: hidden;
+  
+  
 }
 
 .App-logo {
@@ -51,9 +54,9 @@
 
   background-color: rgba(255, 255, 255, 0.123);
   display: grid;
-  grid-template-columns: 18rem 18rem 18rem 18rem 18rem 18rem;
-  gap: 20px;
-  
+  grid-template-columns: 20rem 20rem 20rem 20rem 20rem 20rem;
+  gap: 15px;
+
 
 }
 
@@ -118,7 +121,7 @@ margin-right: 20px;
 .classHeaderList ul{
   list-style-type: none;
   display: grid;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: auto auto auto auto auto;
   gap: 10px;
   justify-self: end;
   
