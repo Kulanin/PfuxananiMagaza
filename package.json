@@ -31,9 +31,6 @@
   },
   "scripts": {
     "start": "node Back_End.js",
-    "build": "npm run build",
-    "install_client": "npm install",
-    "heroku-postbuild":"npm run install-client && npm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
