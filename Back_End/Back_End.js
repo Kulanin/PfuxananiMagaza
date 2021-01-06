@@ -1,14 +1,19 @@
 const config = require("./config.json");
 const sql = require("mssql");
 require('dotenv').config();
-
-
 const express = require("express");
+const favicon = require("express-favicon")
+const app = express();
+
+
 const bcrypt = require("bcrypt");
 const multer = require("multer");
+const path = require("path");
+app.use(express.static(__dirname))
+app.use(favicon(__dirname + "/build/favicon.ico"))
 
 
-const app = express();
+
 let bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -640,10 +645,15 @@ app.post("/Payment",(req,res)=>{
 
 */
 
-if(process.env.NODE_ENV === "production"){
+// if(process.env.NODE_ENV === "production"){
 
-    app.use(express.static("client/build"))
-}
+//     app.use(express.static("client/build"))
+// }
+
+app.get("/",(req,res)=>{
+
+    res.sendfile(path.join(__dirname,"build","index.html"))
+})
 
 const PORT_Number = process.env.PORT || 5001;
 
