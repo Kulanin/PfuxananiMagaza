@@ -30,7 +30,7 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "node Back_End.js",
+    "start": "react-scripts start",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
