@@ -654,9 +654,9 @@ app.post("/Payment",(req,res)=>{
 
 const PORT_Number = process.env.PORT || 5001;
 
-if(process.env.NODE_ENV === "production"){
-    app.use(express.static("/build"));
-}
+// if(process.env.NODE_ENV === "production"){
+//     app.use(express.static("/build"));
+// }
 
 const server = app.listen(PORT_Number, () => {
 
