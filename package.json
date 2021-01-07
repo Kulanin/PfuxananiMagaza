@@ -30,15 +30,10 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "web-vitals": "^0.2.4"
-    
   },
   "scripts": {
-   
-   
-    "build":"npm run build",
-    "install_Kulani": "npm install",
-    "start": "node Back_End/Back_End.js",
-    "heroku-postbuild":"npm run install_Kulani && npm run build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
