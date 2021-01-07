@@ -38,7 +38,7 @@
     "build":"npm run build",
     "install_Kulani": "npm install",
     "start": "node Back_End/Back_End.js",
-    "heroku-postbuild":"npm run install_Kulani && npm run kulaniBuild",
+    "heroku-postbuild":"npm run install_Kulani && npm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
