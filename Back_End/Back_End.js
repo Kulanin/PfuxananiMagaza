@@ -27,7 +27,7 @@ const { find } = require("../models/Stokvel");
 
 const fs = require("fs");
 
-let appJs = require("./src/App.js")
+let appJs = require("../src/App.js")
 
 const storage = multer.diskStorage({
     destination: function (req,file,cb){
