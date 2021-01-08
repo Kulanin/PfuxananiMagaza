@@ -41,7 +41,7 @@
 
     "server": "node Back_End/Back_End.js",
         "client": "react-scripts start",
-        "dev": "concurrently \"npm run server\" \"npm run client\""
+        "dev": "concurrently \"npm run client\" \"npm run server\""
   },
   "eslintConfig": {
     "extends": [
